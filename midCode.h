@@ -6,37 +6,37 @@
 #include <vector>
 
 enum mid_operation {
-    MainOp,   //main:
-    PlusOp, //+
-    MinuOp, //-
-    MultOp, //*
-    DivOp,  // /
-    LssOp,  //<
-    LeqOp,  //<=
-    GreOp,  //>
-    GeqOp,  //>=
-    BeqOp,  //==
-    NeqOp,  //!=
-    AssignOp,  //=
-    GoTo,  //无条件跳转
+    Main,   //j main
+    PLUSOP, //+
+    MINUOP, //-
+    MULTOP, //*
+    DIVOP,  // /
+    LSSOP,  //<
+    LEQOP,  //<=
+    GREOP,  //>
+    GEQOP,  //>=
+    BEQOP,  //==
+    NEQOP,  //!=
+    ASSIGNOP,  //=
+    GOTO,  //无条件跳转
     BZ,    //不满足条件跳转
     BNZ,   //满足条件跳转
-    PushOp,  //函数调用时参数传递
-    Call,  //函数调用
-    ReturnOp,   //函数返回语句
-    ReturnValue, //有返回值函数返回的结果
-    ScanOp,  //读
-    PrintOp, //写
-    Label, //标号
-    Con, //常量
-    ArrayOp, //数组
-    VarOp,   //无初始化变量
-    VvarOp,  //初始化变量
-    FuncOp,  //函数定义
-    ParamOp, //函数参数
-    GetArray,  //取数组的值  t = a[]
-    PutArray,  //给数组赋值  a[] = t
-    Exit,  //退出 main最后
+    PUSH,  //函数调用时参数传递
+    CALL,  //函数调用
+    RET,   //函数返回语句
+    RETVALUE, //有返回值函数返回的结果
+    SCAN,  //读
+    PRINT, //写
+    LABEL, //标号
+    CON, //常量
+    ARRAY, //数组
+    VAR,   //无初始化变量
+    VVAR,  //初始化变量
+    FUNC,  //函数定义
+    PARAM, //函数参数
+    GETARRAY,  //取数组的值  t = a[]
+    PUTARRAY,  //给数组赋值  a[] = t
+    EXIT,  //退出 main最后
 };
 
 using namespace std;
@@ -63,4 +63,3 @@ public:
         arrayNum.push_back(t);
     }
 };
-extern void outputMidCode();

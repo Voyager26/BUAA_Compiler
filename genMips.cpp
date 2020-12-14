@@ -25,7 +25,7 @@ extern std::map<string, map<string, Symbology>> allLocalSymbolTable;
 
 void loadValue(string name, string regName, bool gene, int &va, bool &get) {
     int addr;
-    auto a = allLocalSymbolTable[curFuncName];
+    //auto a = allLocalSymbolTable[curFuncName];
     if (allLocalSymbolTable[curFuncName].find(name) != allLocalSymbolTable[curFuncName].end()) {
         if (allLocalSymbolTable[curFuncName][name].kind.compare("const") == 0) {  //const
             va = allLocalSymbolTable[curFuncName][name].constValue;
@@ -84,9 +84,10 @@ void genMips() {
     mipsCodeTable.push_back(mipsCode(asciizSeg, "nextLine", "\\n", ""));
     //全局变量从$gp向上加
     mipsCodeTable.push_back(mipsCode(textSeg, "", "", ""));  //.text
-    bool first = false;
+    bool flag = false;
     int len = 0, addr = 0, va = 0, va2 = 0;
     bool get1 = false, get2 = false;
+    int pushCnt = 0;
     int paramSize = 0;
     vector<midCode> pushOpStack;
     for (int i = 0; i < midCodeTable.size(); i++) {
@@ -94,27 +95,11 @@ void genMips() {
         midCode mcNext = mc;
         //auto a = allLocalSymbolTable[curFuncName];
         switch (mc.op) {
-            case MainOp: {
-                if((midCodeTable[i-1]).op != ReturnOp && first){
-                    mipsCodeTable.push_back(mipsCode(jr, "$ra", "", ""));
-                    first = true;
-                }
-                first = true;
-                mipsCodeTable.push_back(mipsCode(label, "main", "", ""));
-                len = globalSymbolMap["main"].length;
-                mipsCodeTable.push_back(mipsCode(moveop, "$fp", "$sp", ""));
-                mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 8));
-                curFuncName = "main";  //记录当前的函数名字
+            case Main: {
+                mipsCodeTable.push_back(mipsCode(j, "main", "", ""));
                 break;
             }
-            case AssignOp: {
-                //mc.z是局部的变量 或 全局的变量
-                //mc.x可能是标识符也可能是数值 $t0
-                loadValue(mc.x, "$t0", true, va, get1);
-                storeValue(mc.z, "$t0");
-                break;
-            }
-            case PlusOp: {
+            case PLUSOP: {
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va, get1);
                 get2 = false;
@@ -126,12 +111,12 @@ void genMips() {
                 } else if (!get1 && get2) {
                     mipsCodeTable.push_back(mipsCode(addi, "$t2", "$t0", "", va2));
                 } else {
-                    mipsCodeTable.push_back(mipsCode(addu, "$t2", "$t0", "$t1"));
+                    mipsCodeTable.push_back(mipsCode(add, "$t2", "$t0", "$t1"));
                 }
                 storeValue(mc.z, "$t2");
                 break;
             }
-            case MinuOp: {
+            case MINUOP: {
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va, get1);
                 get2 = false;
@@ -149,7 +134,7 @@ void genMips() {
                 storeValue(mc.z, "$t2");
                 break;
             }
-            case MultOp: {
+            case MULTOP: {
                 loadValue(mc.x, "$t0", true, va, get1);
                 loadValue(mc.y, "$t1", true, va2, get2);
                 mipsCodeTable.push_back(mipsCode(mult, "$t0", "$t1", ""));
@@ -157,7 +142,7 @@ void genMips() {
                 storeValue(mc.z, "$t2");
                 break;
             }
-            case DivOp: {
+            case DIVOP: {
                 loadValue(mc.x, "$t0", true, va, get1);
                 loadValue(mc.y, "$t1", true, va2, get2);
                 mipsCodeTable.push_back(mipsCode(divop, "$t0", "$t1", ""));
@@ -165,7 +150,14 @@ void genMips() {
                 storeValue(mc.z, "$t2");
                 break;
             }
-            case ScanOp: {
+            case ASSIGNOP: {
+                //mc.z是局部的变量 或 全局的变量
+                //mc.x可能是标识符也可能是数值 $t0
+                loadValue(mc.x, "$t0", true, va, get1);
+                storeValue(mc.z, "$t0");
+                break;
+            }
+            case SCAN: {
                 //mc.z是局部的变量 或 全局的变量
                 if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
                     && allLocalSymbolTable[curFuncName][mc.z].kind.compare("var") == 0) {
@@ -190,7 +182,7 @@ void genMips() {
                 }
                 break;
             }
-            case PrintOp: {
+            case PRINT: {
                 if (mc.x[0] == '0') {  //string
                     for (int i = 0; i < stringList.size(); i++) {
                         if (stringList[i] == mc.z) {
@@ -211,25 +203,25 @@ void genMips() {
                 }
                 break;
             }
-            case Label: {
+            case LABEL: {
                 mipsCodeTable.push_back(mipsCode(label, mc.z, "", ""));
                 break;
             }
-            case FuncOp: {
-                if((midCodeTable[i-1]).op != ReturnOp && first){
-                    mipsCodeTable.push_back(mipsCode(jr, "$ra", "", "", 10));
-                    first = true;
-                }
-                first = true;
+            case FUNC: {
                 mipsCodeTable.push_back(mipsCode(label, mc.x, "", ""));
+                if (mc.x.compare("main")==0) {
+                    len = globalSymbolMap[mc.x].length;
+                    mipsCodeTable.push_back(mipsCode(moveop, "$fp", "$sp", ""));
+                    mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 8));
+                }
                 curFuncName = mc.x;  //记录当前的函数名字
                 break;
             }
-            case PushOp: {
+            case PUSH: {
                 pushOpStack.push_back(mc);
                 break;
             }
-            case Call: {
+            case CALL: {
                 // mc.z funName
                 paramSize = globalSymbolMap[mc.z].otherInfo.size();
                 int h = 1;
@@ -250,13 +242,13 @@ void genMips() {
                 mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", 4 * globalSymbolMap[mc.z].length + 8));
                 break;
             }
-            case ReturnOp: {
+            case RET: {
                 //0-ra,1-fp, 2...局部变量
                 loadValue(mc.z, "$v0", true, va, get1);
                 mipsCodeTable.push_back(mipsCode(jr, "$ra", "", ""));
                 break;
             }
-            case ReturnValue: {
+            case RETVALUE: {
                 // 表达式内的函数调用需要把$v0的值赋给mc.z
                 if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[mc.x].end()
                     && allLocalSymbolTable[curFuncName][mc.z].kind.compare("var") == 0) {
@@ -265,7 +257,7 @@ void genMips() {
                 }
                 break;
             }
-            case ArrayOp: {
+            case ARRAY: {
                 //op z:name x:类型 y:有无初始化 arrayNum: //[0]维度 [1]/[1][2]各维度个数 之后为数组元素
                 bool isGlobal = true;
                 if (mc.y.compare("0") == 0) {
@@ -315,7 +307,7 @@ void genMips() {
                 }
                 break;
             }
-            case GetArray: {
+            case GETARRAY: {
                 if (mc.y.compare("1") == 0) {
                     get1 = false;
                     loadValue(mc.arrayInfo[0], "$t0", false, va, get1);
@@ -389,7 +381,7 @@ void genMips() {
                 storeValue(mc.z, "$t0");
                 break;
             }
-            case PutArray: {
+            case PUTARRAY: {
                 //z-要存入的数 x-name y-维数
                 get1 = false;
                 loadValue(mc.z, "$t3", true, va, get1); //要存入的数
@@ -464,23 +456,23 @@ void genMips() {
                 }
                 break;
             }
-            case Exit: {
+            case EXIT: {
                 mipsCodeTable.push_back(mipsCode(li, "$v0", "", "", 10));
                 mipsCodeTable.push_back(mipsCode(syscall, "", "", ""));
                 break;
             }
-            case VvarOp: {
+            case VVAR: {
                 va = toInt(mc.y);
                 bool get;
                 mipsCodeTable.push_back(mipsCode(li, "$t0", "", "", va));
                 storeValue(mc.z, "$t0");
                 break;
             }
-            case GoTo: {
+            case GOTO: {
                 mipsCodeTable.push_back(mipsCode(j, mc.z, "", ""));
                 break;
             }
-            case LssOp: {  //<
+            case LSSOP: {  //<
                 int va1, va2;
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va1, get1);
@@ -501,7 +493,7 @@ void genMips() {
                 }
                 break;
             }
-            case LeqOp: {  //<=
+            case LEQOP: {  //<=
                 int va1, va2;
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va1, get1);
@@ -522,7 +514,7 @@ void genMips() {
                 }
                 break;
             }
-            case GreOp: {  //>
+            case GREOP: {  //>
                 int va1, va2;
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va1, get1);
@@ -543,7 +535,7 @@ void genMips() {
                 }
                 break;
             }
-            case GeqOp: {  //>=
+            case GEQOP: {  //>=
                 int va1, va2;
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va1, get1);
@@ -564,7 +556,7 @@ void genMips() {
                 }
                 break;
             }
-            case BeqOp: {  //==
+            case BEQOP: {  //==
                 int va1, va2;
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va1, get1);
@@ -585,7 +577,7 @@ void genMips() {
                 }
                 break;
             }
-            case NeqOp: {  // !=
+            case NEQOP: {  // !=
                 int va1, va2;
                 get1 = false;
                 loadValue(mc.x, "$t0", false, va1, get1);
@@ -611,7 +603,7 @@ void genMips() {
             }
         }
     }
-    if((midCodeTable.end()-1)->op != Exit){
+    if((midCodeTable.end()-1)->op != EXIT){
         mipsCodeTable.push_back(mipsCode(li, "$v0", "", "", 10));
         mipsCodeTable.push_back(mipsCode(syscall, "", "", ""));
     }
@@ -623,9 +615,6 @@ void outputMipsCode() {
         switch (mc.op) {
             case add:
                 mips << "add " << mc.z << "," << mc.x << "," << mc.y << "\n";
-                break;
-            case addu:
-                mips << "addu " << mc.z << "," << mc.x << "," << mc.y << "\n";
                 break;
             case sub:
                 mips << "sub " << mc.z << "," << mc.x << "," << mc.y << "\n";

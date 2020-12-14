@@ -8,43 +8,43 @@ void outputMidCode() {
     for (int i = 0; i < midCodeTable.size(); i++) {
         midCode mc = midCodeTable[i];
         switch (mc.op) {
-            case MainOp:
-                midCodefile << "---main在这里---" << "\n";
+            case Main:
+                midCodefile << "--- here is main---" << "\n";
                 break;
-            case PlusOp:
+            case PLUSOP:
                 midCodefile << mc.z << " = " << mc.x << " + " << mc.y << "\n";
                 break;
-            case MinuOp:
+            case MINUOP:
                 midCodefile << mc.z << " = " << mc.x << " - " << mc.y << "\n";
                 break;
-            case MultOp:
+            case MULTOP:
                 midCodefile << mc.z << " = " << mc.x << " * " << mc.y << "\n";
                 break;
-            case DivOp:
+            case DIVOP:
                 midCodefile << mc.z << " = " << mc.x << " / " << mc.y << "\n";
                 break;
-            case LssOp:
+            case LSSOP:
                 midCodefile  << mc.x << " >= " << mc.y << " goto "<< mc.z << "\n";
                 break;
-            case LeqOp:
+            case LEQOP:
                 midCodefile << mc.x << " > " << mc.y << " goto "<< mc.z << "\n";
                 break;
-            case GreOp:
+            case GREOP:
                 midCodefile << mc.x << " < " << mc.y << " goto "<< mc.z << "\n";
                 break;
-            case GeqOp:
+            case GEQOP:
                 midCodefile << mc.x << " <= " << mc.y << " goto "<< mc.z << "\n";
                 break;
-            case BeqOp:
+            case BEQOP:
                 midCodefile << mc.x << " != " << mc.y << " goto "<< mc.z << "\n";
                 break;
-            case NeqOp:
+            case NEQOP:
                 midCodefile << mc.x << " == " << mc.y << " goto "<< mc.z << "\n";
                 break;
-            case AssignOp:
+            case ASSIGNOP:
                 midCodefile << mc.z << " = " << mc.x << "\n";
                 break;
-            case GoTo:
+            case GOTO:
                 midCodefile << "GOTO " << mc.z << "\n";
                 break;
             case BZ:
@@ -53,47 +53,47 @@ void outputMidCode() {
             case BNZ:
                 midCodefile << "BNZ " << mc.z << "(" << mc.x << "=1)" << "\n";
                 break;
-            case PushOp:
+            case PUSH:
                 midCodefile << "PUSH " << mc.z << "\n";
                 break;
-            case Call:
+            case CALL:
                 midCodefile << "CALL " << mc.z << "\n";
                 break;
-            case ReturnOp:
+            case RET:
                 midCodefile << "RET " << mc.z << "\n";
                 break;
-            case ReturnValue:
+            case RETVALUE:
                 midCodefile << "RETVALUE " << mc.z << " = " << mc.x << "\n";
                 break;
-            case ScanOp:
+            case SCAN:
                 midCodefile << "SCAN " << mc.z << "\n";
                 break;
-            case PrintOp:
+            case PRINT:
                 midCodefile << "PRINT " << mc.z << " " << mc.x << "\n";
                 break;
-            case Label:
+            case LABEL:
                 midCodefile << mc.z << ": \n";
                 break;
-            case ArrayOp:
+            case ARRAY:
                 midCodefile << "ARRAY " << mc.z << " " << mc.x << " 是否初始化" << mc.y << endl;
                 break;
-            case VarOp:
+            case VAR:
                 midCodefile << "VAR " << mc.z << " " << mc.x << endl;
                 break;//*/
-            case FuncOp:
+            case FUNC:
                 midCodefile << "FUNC " << mc.z << " " << mc.x << "()" << endl;
                 break;
-            case ParamOp:
+            case PARAM:
                 midCodefile << "PARA " << mc.z << " " << mc.x << endl;
                 break;
-            case GetArray:
+            case GETARRAY:
                 midCodefile << mc.z << " = " << mc.x << " 维度" << mc.y << "\n";
                 break;
-            case PutArray:
+            case PUTARRAY:
                 midCodefile << mc.x << " 维度" << mc.y  << " = " << mc.z << "\n";
                 break;
-            case Exit:
-                midCodefile << "EXIT programme\n";
+            case EXIT:
+                midCodefile << "EXIT\n";
                 break;
             default:
                 break;

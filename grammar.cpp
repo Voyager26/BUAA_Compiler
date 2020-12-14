@@ -36,7 +36,7 @@ bool String(string &tmp) {
 bool program() {
     constDeclaration(1);
     varDeclaration(1);
-    midCodeTable.push_back(midCode(GoTo, "main", "", ""));
+    midCodeTable.push_back(midCode(Main));
     while (true) {
         if (Symbol == INTTK || Symbol == CHARTK) {
             if (!valueReturnFunction()) {           //有返回值函数
@@ -139,7 +139,7 @@ bool constDefinition(int global) {
                         fileerror << lines << " b\n";
                     }
                 }
-                midCodeTable.push_back(midCode(Con, name, "int", toString(tmpNum)));
+                midCodeTable.push_back(midCode(CON, name, "int", toString(tmpNum)));
                 if (Symbol != COMMA) {      //为，则退出，保留预读
                     fileout << "<常量定义>" << endl;
                     return true;
@@ -177,7 +177,7 @@ bool constDefinition(int global) {
                                         fileerror << lines << " b\n";
                                     }
                                 }
-                                midCodeTable.push_back(midCode(Con, name, "int", toString(tmpNum)));
+                                midCodeTable.push_back(midCode(CON, name, "int", toString(tmpNum)));
                             }
                         }
                     }
@@ -216,7 +216,7 @@ bool constDefinition(int global) {
                         fileerror << lines << " b\n";
                     }
                 }
-                midCodeTable.push_back(midCode(Con, name, "char", toString((char) tmpV)));
+                midCodeTable.push_back(midCode(CON, name, "char", toString((char) tmpV)));
                 doOutPut();
                 getsym();
                 if (Symbol != COMMA) {      //为，则退出，保留预读
@@ -254,7 +254,7 @@ bool constDefinition(int global) {
                                         fileerror << lines << " b\n";
                                     }
                                 }
-                                midCodeTable.push_back(midCode(Con, name, "char", toString((char) tmpV)));
+                                midCodeTable.push_back(midCode(CON, name, "char", toString((char) tmpV)));
                                 doOutPut();
                                 getsym();
                             }
@@ -328,10 +328,10 @@ bool deHead(int *t) {
         funName.assign(inLowerToken);
         if (globalSymbolMap.find(funName) == globalSymbolMap.end()) {  //没找到
             globalSymbolMap.insert(make_pair(funName, Symbology(funName, "fun", type)));
-        } else {
+        } else {  //找到了 说明重定义了
             fileerror << lines << " b\n";
         }
-        midCodeTable.push_back(midCode(FuncOp, type, funName, ""));
+        midCodeTable.push_back(midCode(FUNC, type, funName, ""));
         doOutPut();
         fileout << "<声明头部>" << endl;
         getsym();  //预读
@@ -553,7 +553,7 @@ bool varUnInitialDefinition(int global) {
                     fileerror << lines << " b\n";
                 }
             }
-            midCodeTable.push_back(midCode(VarOp, name, type, ""));
+            midCodeTable.push_back(midCode(VAR, name, type, ""));
             doOutPut();
             getsym();
             continue;
@@ -594,7 +594,7 @@ bool varUnInitialDefinition(int global) {
                             fileerror << lines << " b\n";
                         }
                     }
-                    midCodeTable.push_back(midCode(ArrayOp, name, type, "0"));
+                    midCodeTable.push_back(midCode(ARRAY, name, type, "0"));
                     (midCodeTable.end() - 1)->insert(1);
                     (midCodeTable.end() - 1)->insert(tmpArr1);
                     doOutPut();
@@ -638,7 +638,7 @@ bool varUnInitialDefinition(int global) {
                                 fileerror << lines << " b\n";
                             }
                         }
-                        midCodeTable.push_back(midCode(ArrayOp, name, type, "0"));
+                        midCodeTable.push_back(midCode(ARRAY, name, type, "0"));
                         (midCodeTable.end() - 1)->insert(2);
                         (midCodeTable.end() - 1)->insert(tmpArr1);
                         (midCodeTable.end() - 1)->insert(tmpArr2);
@@ -664,7 +664,7 @@ bool varUnInitialDefinition(int global) {
                                 fileerror << lines << " b\n";
                             }
                         }
-                        midCodeTable.push_back(midCode(ArrayOp, name, type, "0"));
+                        midCodeTable.push_back(midCode(ARRAY, name, type, "0"));
                         (midCodeTable.end() - 1)->insert(2);
                         (midCodeTable.end() - 1)->insert(tmpArr1);
                         (midCodeTable.end() - 1)->insert(tmpArr2);
@@ -690,7 +690,7 @@ bool varUnInitialDefinition(int global) {
                             fileerror << lines << " b\n";
                         }
                     }
-                    midCodeTable.push_back(midCode(ArrayOp, name, type, "0"));
+                    midCodeTable.push_back(midCode(ARRAY, name, type, "0"));
                     (midCodeTable.end() - 1)->insert(1);
                     (midCodeTable.end() - 1)->insert(tmpArr1);
                     fileout << "<变量定义无初始化>" << endl;
@@ -713,7 +713,7 @@ bool varUnInitialDefinition(int global) {
                     fileerror << lines << " b\n";
                 }
             }
-            midCodeTable.push_back(midCode(VarOp, name, type, ""));
+            midCodeTable.push_back(midCode(VAR, name, type, ""));
             fileout << "<变量定义无初始化>" << endl;
             return true;                        //其他符号表示声明结束
         }
@@ -773,7 +773,7 @@ bool varInitialDefinition(int global) {
                         fileerror << lines << " b\n";
                     }
                 }
-                midCodeTable.push_back(midCode(VvarOp, name, type, nowConst));
+                midCodeTable.push_back(midCode(VVAR, name, type, nowConst));
                 fileout << "<变量定义及初始化>" << endl;
                 return true;
             }
@@ -808,7 +808,7 @@ bool varInitialDefinition(int global) {
                             fileerror << lines << " o\n";
                         }
                         int i = 1;
-                        midCodeTable.push_back(midCode(ArrayOp, name, type, "1"));
+                        midCodeTable.push_back(midCode(ARRAY, name, type, "1"));
                         (midCodeTable.end() - 1)->insert(1);
                         (midCodeTable.end() - 1)->insert(num1);
                         (midCodeTable.end() - 1)->insert(toInt(nowConst));
@@ -873,7 +873,7 @@ bool varInitialDefinition(int global) {
                         if (Symbol == ASSIGN) {
                             doOutPut();
                             getsym();
-                            midCodeTable.push_back(midCode(ArrayOp, name, type, "1"));
+                            midCodeTable.push_back(midCode(ARRAY, name, type, "1"));
                             (midCodeTable.end() - 1)->insert(2);
                             (midCodeTable.end() - 1)->insert(num1);
                             (midCodeTable.end() - 1)->insert(num2);
@@ -1024,7 +1024,7 @@ bool noValueReturnFunction() {
         getsym();
         if (Symbol == IDENFR) {
             funName.assign(inLowerToken);
-            midCodeTable.push_back(midCode(FuncOp,"void", funName, ""));
+            midCodeTable.push_back(midCode(FUNC,"void", funName, ""));
             if (globalSymbolMap.find(funName) == globalSymbolMap.end()) {  //没找到
                 globalSymbolMap.insert(make_pair(funName, Symbology(funName, "fun", "void")));
             } else {  //找到了 说明重定义了
@@ -1060,6 +1060,7 @@ bool noValueReturnFunction() {
                                     globalSymbolMap[funName].length = localAddr;
                                     localSymbolMap.clear();
                                     localAddr = 3;
+                                    midCodeTable.push_back(midCode(RET, "", "", ""));
                                     return true;
                                 }
                             }
@@ -1165,7 +1166,7 @@ bool mainFunction() {
             doOutPut();
             getsym();
             funName.assign("main");
-            midCodeTable.push_back(midCode(MainOp, "void", "main", ""));
+            midCodeTable.push_back(midCode(FUNC, "void", "main", ""));
             if (Symbol == LPARENT) {
                 doOutPut();
                 getsym();
@@ -1221,7 +1222,7 @@ bool expression(int *t, string &value) {
             res = genTmp();
             localSymbolMap.insert(make_pair(res, Symbology(res, "var", "int", 0, localAddr)));  //kind=1=var,type=1=int
             localAddr++;
-            midCodeTable.push_back(midCode(MinuOp, res, toString(0), op1));
+            midCodeTable.push_back(midCode(MINUOP, res, toString(0), op1));
             op1 = res;
         }
     }
@@ -1250,7 +1251,7 @@ bool expression(int *t, string &value) {
         res = genTmp();
         localSymbolMap.insert(make_pair(res, Symbology(res, "var", "int", 0, localAddr)));  //kind=1=var,type=1=int
         localAddr++;
-        midCodeTable.push_back(midCode(isPLUS ? PlusOp : MinuOp, res, op1, op2));
+        midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, res, op1, op2));
         op1 = res;
     }
     if (first) {  //带有最前边的+-号 一定是int
@@ -1298,7 +1299,7 @@ bool item(int *t, string &value) {
         //string name, string kind, string type, int value, int addr
         localSymbolMap.insert(make_pair(res, Symbology(res, "var", "int", 0, localAddr)));  //kind=1=var,type=1=int
         localAddr++;
-        midCodeTable.push_back(midCode(isMULT ? MultOp : DivOp, res, op1, op2));
+        midCodeTable.push_back(midCode(isMULT ? MULTOP : DIVOP, res, op1, op2));
         op1 = res;
     }
     if (flag) {  //项中包括了乘法除法 就一定是int了
@@ -1370,7 +1371,7 @@ bool factor(int *t, string &value) {
                         make_pair(op2, Symbology(op2, "var", "", type, localAddr)));  //kind=1=var,type=数组的type
                 localAddr++;
                 if (Symbol != LBRACK) {
-                    midCodeTable.push_back(midCode(GetArray, op2, name, "1"));
+                    midCodeTable.push_back(midCode(GETARRAY, op2, name, "1"));
                     (midCodeTable.end() - 1)->info(op1);
                     value = op2;
                     fileout << "<因子>" << endl;
@@ -1398,7 +1399,7 @@ bool factor(int *t, string &value) {
                         localSymbolMap.insert(make_pair(value, Symbology(value, "var", "", type,
                                                                          localAddr)));  //kind=1=var,type=数组的type
                         localAddr++;
-                        midCodeTable.push_back(midCode(GetArray, value, name, "2"));
+                        midCodeTable.push_back(midCode(GETARRAY, value, name, "2"));
                         (midCodeTable.end() - 1)->info(op1);
                         (midCodeTable.end() - 1)->info(op2);
                         fileout << "<因子>" << endl;
@@ -1439,7 +1440,7 @@ bool factor(int *t, string &value) {
                     *t = type;
                     string op1 = genTmp();
                     localSymbolMap.insert(make_pair(op1, Symbology(op1, "var", "", type, localAddr ++)));
-                    midCodeTable.push_back(midCode(ReturnValue, op1, name, ""));
+                    midCodeTable.push_back(midCode(RETVALUE, op1, name, ""));
                     value = op1;
                     //调用有返回值的函数调用语句成功 并预读了一个单词
                     fileout << "<因子>" << endl;
@@ -1715,7 +1716,7 @@ bool assignStatement() {
             doOutPut();
             getsym();
             if (expression(&type, value)) {
-                midCodeTable.push_back(midCode(AssignOp, name, value, ""));
+                midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
                 fileout << "<赋值语句>" << endl;
                 return true;
             }
@@ -1741,7 +1742,7 @@ bool assignStatement() {
                         doOutPut();
                         getsym();
                         if (expression(&type, value)) {
-                            midCodeTable.push_back(midCode(PutArray, value, name, "1"));
+                            midCodeTable.push_back(midCode(PUTARRAY, value, name, "1"));
                             (midCodeTable.end() - 1)->info(op1);
                             fileout << "<赋值语句>" << endl;
                             return true;
@@ -1769,7 +1770,7 @@ bool assignStatement() {
                                     doOutPut();
                                     getsym();
                                     if (expression(&type, value)) {
-                                        midCodeTable.push_back(midCode(PutArray, value, name, "2"));
+                                        midCodeTable.push_back(midCode(PUTARRAY, value, name, "2"));
                                         (midCodeTable.end() - 1)->info(op1);
                                         (midCodeTable.end() - 1)->info(op2);
                                         fileout << "<赋值语句>" << endl;
@@ -1811,8 +1812,8 @@ bool conditionStatement() {
                     return false;
                 }
                 //goto labelOut
-                midCodeTable.push_back(midCode(GoTo, labelOut, "", ""));
-                midCodeTable.push_back(midCode(Label, label, "", ""));
+                midCodeTable.push_back(midCode(GOTO, labelOut, "", ""));
+                midCodeTable.push_back(midCode(LABEL, label, "", ""));
                 //开始分析［else＜语句＞］
                 if (Symbol == ELSETK) {  //else
                     //label
@@ -1823,7 +1824,7 @@ bool conditionStatement() {
                     }
                     //labelOut
                 }
-                midCodeTable.push_back(midCode(Label, labelOut, "", ""));
+                midCodeTable.push_back(midCode(LABEL, labelOut, "", ""));
                 fileout << "<条件语句>" << endl;
                 return true;
             } else {
@@ -1849,22 +1850,22 @@ bool condition(string &res) {
             mid_operation op;
             switch (Symbol) {
                 case LSS:
-                    op = LssOp;
+                    op = LSSOP;
                     break;
                 case LEQ:
-                    op = LeqOp;
+                    op = LEQOP;
                     break;
                 case GRE:
-                    op = GreOp;
+                    op = GREOP;
                     break;
                 case GEQ:
-                    op = GeqOp;
+                    op = GEQOP;
                     break;
                 case EQL:
-                    op = BeqOp;
+                    op = BEQOP;
                     break;
                 case NEQ:
-                    op = NeqOp;
+                    op = NEQOP;
                     break;
             }
             getsym();
@@ -1894,7 +1895,7 @@ bool loopStatement() {
         if (Symbol == LPARENT) {
             doOutPut();
             getsym();
-            midCodeTable.push_back(midCode(Label, label, "", ""));
+            midCodeTable.push_back(midCode(LABEL, label, "", ""));
             if (condition(labelOut)) {
                 if (Symbol != RPARENT) { //不是)报错
                     retractG();
@@ -1906,8 +1907,8 @@ bool loopStatement() {
                     getsym();
                     if (Statement()) {
                         //labelOut
-                        midCodeTable.push_back(midCode(GoTo, label, "", ""));
-                        midCodeTable.push_back(midCode(Label, labelOut, "", ""));
+                        midCodeTable.push_back(midCode(GOTO, label, "", ""));
+                        midCodeTable.push_back(midCode(LABEL, labelOut, "", ""));
                         fileout << "<循环语句>" << endl;
                         return true;
                     }
@@ -1950,7 +1951,7 @@ bool loopStatement() {
                     doOutPut();
                     getsym();
                     if (expression(&type, value)) {
-                        midCodeTable.push_back(midCode(AssignOp, name, value, ""));
+                        midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
                         if (Symbol != SEMICN) { //不是;报错
                             retractG();
                             fileerror << lines << " k\n";
@@ -1959,7 +1960,7 @@ bool loopStatement() {
                         if (Symbol == SEMICN) {
                             doOutPut();
                             getsym();
-                            midCodeTable.push_back(midCode(Label, label, "", ""));
+                            midCodeTable.push_back(midCode(LABEL, label, "", ""));
                             if (condition(labelOut)) {
                                 if (Symbol != SEMICN) { //不是;报错
                                     retractG();
@@ -1967,8 +1968,8 @@ bool loopStatement() {
                                     Symbol = SEMICN;
                                 }
                                 if (Symbol == SEMICN) {
-                                    midCodeTable.push_back(midCode(GoTo, label3, "", ""));
-                                    midCodeTable.push_back(midCode(Label, label2, "", ""));
+                                    midCodeTable.push_back(midCode(GOTO, label3, "", ""));
+                                    midCodeTable.push_back(midCode(LABEL, label2, "", ""));
                                     doOutPut();
                                     getsym();
                                     if (Symbol == IDENFR) {
@@ -2019,13 +2020,13 @@ bool loopStatement() {
                                                     if (step()) {
                                                         if (tmpSymbol == PLUS) {
                                                             midCodeTable.push_back(
-                                                                    midCode(PlusOp, change, name, toString(num)));
+                                                                    midCode(PLUSOP, change, name, toString(num)));
                                                         } else {
                                                             midCodeTable.push_back(
-                                                                    midCode(MinuOp, change, name, toString(num)));
+                                                                    midCode(MINUOP, change, name, toString(num)));
                                                         }
-                                                        midCodeTable.push_back(midCode(AssignOp, name, change, ""));
-                                                        midCodeTable.push_back(midCode(GoTo, label, "", ""));
+                                                        midCodeTable.push_back(midCode(ASSIGNOP, name, change, ""));
+                                                        midCodeTable.push_back(midCode(GOTO, label, "", ""));
                                                         if (Symbol != RPARENT) { //不是)报错
                                                             retractG();
                                                             fileerror << lines << " l\n";
@@ -2034,11 +2035,11 @@ bool loopStatement() {
                                                         if (Symbol == RPARENT) {
                                                             doOutPut();
                                                             getsym();
-                                                            midCodeTable.push_back(midCode(Label, label3, "", ""));
+                                                            midCodeTable.push_back(midCode(LABEL, label3, "", ""));
                                                             if (Statement()) {
-                                                                midCodeTable.push_back(midCode(GoTo, label2, "", ""));
+                                                                midCodeTable.push_back(midCode(GOTO, label2, "", ""));
                                                                 midCodeTable.push_back(
-                                                                        midCode(Label, labelOut, "", ""));
+                                                                        midCode(LABEL, labelOut, "", ""));
                                                                 fileout << "<循环语句>" << endl;
                                                                 return true;
                                                             }
@@ -2085,7 +2086,7 @@ bool switchStatement() {
             doOutPut();
             getsym();
             if (expression(&type, value)) {
-                midCodeTable.push_back(midCode(GoTo, compare, "", ""));
+                midCodeTable.push_back(midCode(GOTO, compare, "", ""));
                 if (Symbol != RPARENT) { //不是)报错
                     retractG();
                     fileerror << lines << " l\n";
@@ -2100,13 +2101,13 @@ bool switchStatement() {
                         if (caseTable(type, value, labelOut)) {
                             if (defaultStatement(otherwise)) {
                                 if (Symbol == RBRACE) {
-                                    midCodeTable.push_back(midCode(Label, compare, "", ""));
+                                    midCodeTable.push_back(midCode(LABEL, compare, "", ""));
                                     for (CASEInfo Case : caseInfo) {
                                         midCodeTable.push_back(
-                                                midCode(NeqOp, Case.label, value, toString(Case.value)));
+                                                midCode(NEQOP, Case.label, value, toString(Case.value)));
                                     }
-                                    midCodeTable.push_back(midCode(GoTo, otherwise, "", ""));
-                                    midCodeTable.push_back(midCode(Label, labelOut, "", ""));
+                                    midCodeTable.push_back(midCode(GOTO, otherwise, "", ""));
+                                    midCodeTable.push_back(midCode(LABEL, labelOut, "", ""));
                                     doOutPut();
                                     getsym();
                                     fileout << "<情况语句>" << endl;
@@ -2130,7 +2131,7 @@ bool switchStatement() {
 //＜情况表＞   ::=  ＜情况子语句＞{＜情况子语句＞}
 bool caseTable(int type, string &value, string &label) {
     while (caseStatement(type, value)) {
-        midCodeTable.push_back(midCode(GoTo, label, "", ""));
+        midCodeTable.push_back(midCode(GOTO, label, "", ""));
     }
     fileout << "<情况表>" << endl;
     return true;
@@ -2153,7 +2154,7 @@ bool caseStatement(int type, string &value) {
             if (Symbol == COLON) {
                 doOutPut();
                 getsym();
-                midCodeTable.push_back(midCode(Label, label, "", ""));
+                midCodeTable.push_back(midCode(LABEL, label, "", ""));
                 if (Statement()) {
                     caseInfo.push_back(CASEInfo(label, constValue));
                     fileout << "<情况子语句>" << endl;
@@ -2175,9 +2176,9 @@ bool defaultStatement(string &labelOut) {
         if (Symbol == COLON) {
             doOutPut();
             getsym();
-            midCodeTable.push_back(midCode(Label, label, "", ""));
+            midCodeTable.push_back(midCode(LABEL, label, "", ""));
             if (Statement()) {
-                midCodeTable.push_back(midCode(GoTo, labelOut, "", ""));
+                midCodeTable.push_back(midCode(GOTO, labelOut, "", ""));
                 labelOut.assign(label);
                 fileout << "<缺省>" << endl;
                 return true;
@@ -2204,7 +2205,7 @@ bool callValueReturnFunction() {
                     Symbol = RPARENT;
                 }
                 if (Symbol == RPARENT) {
-                    midCodeTable.push_back(midCode(Call, funName, "", ""));
+                    midCodeTable.push_back(midCode(CALL, funName, "", ""));
                     doOutPut();
                     getsym();
                     funName.assign(lastFun);
@@ -2234,7 +2235,7 @@ bool callNoValueReturnFunction() {
                     Symbol = RPARENT;
                 }
                 if (Symbol == RPARENT) {
-                    midCodeTable.push_back(midCode(Call, funName, "", ""));
+                    midCodeTable.push_back(midCode(CALL, funName, "", ""));
                     doOutPut();
                     getsym();
                     funName.assign(lastFun);
@@ -2269,7 +2270,7 @@ bool valueParameterTable(const string &Name) {
                 flag = true;
             }
         }
-        midCodeTable.push_back(midCode(PushOp, value, "", ""));
+        midCodeTable.push_back(midCode(PUSH, value, "", ""));
         if (Symbol != COMMA) {              //不是逗号退出循环
             if (globalSymbolMap.find(tmpName) != globalSymbolMap.end() &&
                 i != globalSymbolMap[tmpName].otherInfo.size()) {
@@ -2295,7 +2296,7 @@ bool valueParameterTable(const string &Name) {
                         flag = true;
                     }
                 }
-                midCodeTable.push_back(midCode(PushOp, value, "", ""));
+                midCodeTable.push_back(midCode(PUSH, value, "", ""));
                 if (Symbol != COMMA) {
                     if (globalSymbolMap.find(tmpName) != globalSymbolMap.end() &&
                         i != globalSymbolMap[tmpName].otherInfo.size()) {
@@ -2364,7 +2365,7 @@ bool readStatement() {
                 } else {
                     fileerror << lines << " c\n";  //未定义的名字
                 }
-                midCodeTable.push_back(midCode(ScanOp, name, "", ""));
+                midCodeTable.push_back(midCode(SCAN, name, "", ""));
                 doOutPut();
                 getsym();
                 if (Symbol != RPARENT) { //不是)报错
@@ -2409,7 +2410,7 @@ bool writeStatement() {
                     tmpString.replace(p, 1, "\\\\");
                 }
                 stringList.push_back(tmpString);
-                midCodeTable.push_back(midCode(PrintOp, tmpString, "0", ""));
+                midCodeTable.push_back(midCode(PRINT, tmpString, "0", ""));
                 if (Symbol == COMMA) {                          //,
                     doOutPut();
                     getsym();
@@ -2422,8 +2423,8 @@ bool writeStatement() {
                         if (Symbol == RPARENT) {                //）
                             doOutPut();
                             getsym();
-                            midCodeTable.push_back(midCode(PrintOp, value, type == 0 ? "2" : "3", ""));
-                            midCodeTable.push_back(midCode(PrintOp, "EndLine", "1", ""));
+                            midCodeTable.push_back(midCode(PRINT, value, type == 0 ? "2" : "3", ""));
+                            midCodeTable.push_back(midCode(PRINT, "EndLine", "1", ""));
                             fileout << "<写语句>" << endl;
                             return true;
                         } else {
@@ -2441,12 +2442,12 @@ bool writeStatement() {
                     if (Symbol == RPARENT) {         //）
                         doOutPut();
                         getsym();
-                        midCodeTable.push_back(midCode(PrintOp, "EndLine", "1", ""));
+                        midCodeTable.push_back(midCode(PRINT, "EndLine", "1", ""));
                         fileout << "<写语句>" << endl;
                         return true;
                     }
                 } else if (Symbol == RPARENT) {         //）
-                    midCodeTable.push_back(midCode(PrintOp, "EndLine", "1", ""));
+                    midCodeTable.push_back(midCode(PRINT, "EndLine", "1", ""));
                     doOutPut();
                     getsym();
                     fileout << "<写语句>" << endl;
@@ -2459,8 +2460,8 @@ bool writeStatement() {
                     Symbol = RPARENT;
                 }
                 if (Symbol == RPARENT) {                    //）
-                    midCodeTable.push_back(midCode(PrintOp, value, type == 0 ? "2" : "3", ""));
-                    midCodeTable.push_back(midCode(PrintOp, "EndLine", "1", ""));
+                    midCodeTable.push_back(midCode(PRINT, value, type == 0 ? "2" : "3", ""));
+                    midCodeTable.push_back(midCode(PRINT, "EndLine", "1", ""));
                     doOutPut();
                     getsym();
                     fileout << "<写语句>" << endl;
@@ -2519,7 +2520,7 @@ bool returnStatement() {
                     Symbol = RPARENT;
                 }
                 if (Symbol == RPARENT) {
-                    midCodeTable.push_back(midCode(ReturnOp, value, "", ""));
+                    midCodeTable.push_back(midCode(RET, value, "", ""));
                     doOutPut();
                     getsym();
                     fileout << "<返回语句>" << endl;
@@ -2538,9 +2539,9 @@ bool returnStatement() {
                 fileerror << lines << " h\n";
             }
             if (funName.compare("main") == 0) {
-                midCodeTable.push_back(midCode(Exit, "", "", ""));
+                midCodeTable.push_back(midCode(EXIT, "", "", ""));
             } else {
-                midCodeTable.push_back(midCode(ReturnOp, "", "", ""));
+                midCodeTable.push_back(midCode(RET, "", "", ""));
             }
             fileout << "<返回语句>" << endl;
             return true;
@@ -2592,5 +2593,5 @@ void retractG(int oldindex) {
 
 string genTmp() {
     tmpVarId++;
-    return "Temp" + toString(tmpVarId);
+    return "T" + toString(tmpVarId);
 }

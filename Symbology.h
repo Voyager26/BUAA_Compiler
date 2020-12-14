@@ -9,6 +9,7 @@
 #define COMPILER_SYMBOLOGY_H
 
 using namespace std;
+extern void outputMidCode();
 class Symbology {
 public:
     string name;

@@ -10,7 +10,6 @@ using namespace std;
 
 enum mipsOperation {
     add,
-    addu,
     addi,
     sub,
     mult,
