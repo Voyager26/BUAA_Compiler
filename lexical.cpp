@@ -2,9 +2,11 @@
 #include <string>
 #include "lexical.h"
 #include "globalVar.h"
+#include <math.h>
 using namespace std;
 
 int getsym() {
+    oldIndexs = indexs;
     clearToken();
     getch();
     if (isEOF()) {
@@ -36,30 +38,31 @@ int getsym() {
         return static_cast<int>(Symbol);
     } else if (isSinglequo(ch)) {
         getch();
-        if (isChar(ch)) {
             char tmp = ch;
-            getch();
+            isChar(ch);
+            con_ch = ch;
+            if (ch != '\'') {
+                getch();
+            }
             if (isSinglequo(ch)) {
                 token = tmp;
                 Symbol = CHARCON;
                 return static_cast<int>(Symbol);
             }
-        } else {
-            cout << "error in initial char!" << endl;
-        }
     } else if (isDoublequo(ch)) {
         getch();
         string tmp;
-        while (isChar(ch)) {
+        while (isString(ch)) {
             tmp.append(1, ch);
             getch();
+        }
+        if (tmp.length() == 0 || ch != '\"'){
+            fileerror << lines << " a\n";
         }
         if (isDoublequo(ch)) {
             token = tmp;
             Symbol = STRCON;
             return static_cast<int>(Symbol);
-        } else {
-            cout << "error in initial string!" << endl;
         }
     } else if (isLss(ch)) {
         string tmp;
@@ -179,6 +182,7 @@ bool isSpace(char in){
 }
 
 bool isEnter(char in) {
+    if (in == '\n') lines ++;
     return (in == '\n');
 }
 
@@ -269,8 +273,17 @@ bool isDoublequo(char in){
     return (in == '\"');
 }
 
-bool isChar(char in){
+bool isString(char in){
     return (in == 32 || in == 33 || (in >= 35 && in <=126));
+}
+
+bool isChar(char in) {
+    if (!((in >= 'A' && in <= 'Z') || (in >= 'a' && in <= 'z') || (in >= '0' && in <= '9') ||
+        (in == '_') || (in == '+') || (in == '-') || (in == '*') || (in == '/'))){
+        fileerror << lines << " a\n";
+    }
+    return ((in >= 'A' && in <= 'Z') || (in >= 'a' && in <= 'z') || (in >= '0' && in <= '9') ||
+            (in == '_') || (in == '+') || (in == '-') || (in == '*') || (in == '/'));
 }
 
 /**
@@ -311,8 +324,9 @@ void retract() {
 
 int transNum() {
     int Num = 0;
+    int j = token.length()-1;
     for (int i = 0; i < token.length(); ++i) {
-        Num += i * 10 * (token[i] - '0');
+        Num += pow(10,j--) * (token[i] - '0');
     }
     return Num;
 }

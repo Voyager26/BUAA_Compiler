@@ -9,7 +9,8 @@
 #include "globalVar.h"
 #include "lexical.h"
 #include "grammar.h"
-
+#include "genMips.h"
+#include "midCode.h"
 
 
 using namespace std;
@@ -31,13 +32,22 @@ int main(){
     /**
      * 向文件输出
      */
+    fileerror.open("error.txt", ios::out);
     fileout.open("output.txt", ios::out);
+    mips.open("mips.txt", ios::out);
+    midCodefile.open("midCode.txt", ios::out);
     getsym();
     program();
+    outputMidCode();
+    genMips();
+    outputMipsCode();
+    mips.close();
+    fileerror.close();
     fileout.close();
+    midCodefile.close();
     return 0;
 }
 
 void error(){
-    std::cout << "error!" << std::endl;
+    std::cout << lines << " error!" << std::endl;
 }

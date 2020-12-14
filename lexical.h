@@ -51,6 +51,8 @@ bool isSinglequo(char in);
 
 bool isDoublequo(char in);
 
+bool isString(char in);
+
 bool isChar(char in);
 
 /**
